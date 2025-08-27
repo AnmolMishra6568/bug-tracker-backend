@@ -19,10 +19,16 @@ export function getTransport() {
 }
 
 export async function sendTicketEmail({ to, subject, html }) {
+  if (!to) {
+    console.error("[EMAIL ERROR] No recipient defined", { to, subject });
+    return;
+  }
+
   const from = process.env.SMTP_FROM || "Bug Tracker <noreply@bugtracker.local>";
   const transport = getTransport();
   return transport.sendMail({ from, to, subject, html });
 }
+
 
 
 export function ticketEmailTemplate({ title, projectKey, action, details }) {
