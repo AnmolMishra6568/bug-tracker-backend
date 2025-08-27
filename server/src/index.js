@@ -13,17 +13,25 @@ import { notFound, errorHandler } from "./middleware/error.js";
 dotenv.config();
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173", // local dev (Vite default)
+  "http://localhost:3000", // local dev (CRA default)
+  "https://bug-tracker-frontend-gamma.vercel.app" // your deployed frontend
+];
+
 app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin.startsWith("http://localhost")) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true
+  })
+);
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
