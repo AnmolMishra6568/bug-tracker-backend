@@ -14,9 +14,9 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", // local dev (Vite default)
-  "http://localhost:3000", // local dev (CRA default)
-  "https://bug-tracker-frontend-gamma.vercel.app" // your deployed frontend
+  "http://localhost:5173", 
+  "http://localhost:3000", 
+  "https://bug-tracker-frontend-gamma.vercel.app" 
 ];
 
 app.use(helmet());
