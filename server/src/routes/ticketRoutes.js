@@ -307,6 +307,23 @@ router.patch("/:id", auth(), async (req, res) => {
   res.json(ticket);
 });
 
+// GET /api/tickets/:id - fetch a single ticket
+router.get("/:id", auth(), async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id)
+      .populate("project", "name key members")
+      .populate("reporter", "name email role")
+      .populate("assignee", "name email role");
+
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+
+    res.json(ticket);
+  } catch (err) {
+    console.error("Error fetching ticket:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // DELETE /api/tickets/:id - only admin
 router.delete("/:id", auth(), requireRole("admin"), async (req, res) => {
   const t = await Ticket.findById(req.params.id);
