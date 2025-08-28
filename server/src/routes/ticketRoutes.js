@@ -302,6 +302,7 @@ router.patch("/:id", auth(), async (req, res) => {
     { path: "project", select: "name key" },
     { path: "reporter", select: "name email" },
     { path: "assignee", select: "name email" },
+    { path: "comments.author", select: "name email" }, 
   ]);
 
   res.json(ticket);
@@ -320,6 +321,42 @@ router.get("/:id", auth(), async (req, res) => {
     res.json(ticket);
   } catch (err) {
     console.error("Error fetching ticket:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// POST /api/tickets/:id/comments - add a comment to a ticket
+router.post("/:id/comments", auth(), async (req, res) => {
+  try {
+    const { body } = req.body;
+    if (!body || body.trim() === "") {
+      return res.status(400).json({ message: "Comment body is required" });
+    }
+
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    // Push new comment into ticket
+    const comment = {
+      body,
+      author: req.user._id,
+      createdAt: new Date(),
+    };
+    ticket.comments.push(comment);
+    await ticket.save();
+
+    // repopulate to return full ticket with comments
+    await ticket.populate([
+      { path: "project", select: "name key members" },
+      { path: "reporter", select: "name email role" },
+      { path: "assignee", select: "name email role" },
+    ]);
+
+    res.status(201).json(ticket);
+  } catch (err) {
+    console.error("Error adding comment:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
